@@ -1,1 +1,79 @@
-hello
+<svg id="svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- Arrowhead marker definition -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+
+        <!-- Dot marker definition -->
+        <marker id="dot" viewBox="0 0 5 5" refX="2" refY="2" markerWidth="2" markerHeight="2">
+            <circle cx="2" cy="2" r="2" fill="red" />
+        </marker>
+    </defs>
+    <!-- 同じ多角形で線を持ち塗りつぶされない例 -->
+    <g id="polys" fill="none" width="400" height="200" stroke="black">
+        <polygon id="poly" fill="none" stroke="black" />
+    </g>
+    <text id="caption" x="0" y="0" font-family="Verdana" font-size="10" text-anchor="middle"
+        dominant-baseline="middle">n</text>
+</svg>
+<script>
+    const r = 80;
+    const cx = 200, cy = 100;
+    let points = "";
+    let rr, gg, bb;
+    let f, count;
+
+    async function sub(n, s, b) {
+        let points = "";
+        for (let i = 0; i < n * s; i += s) {
+            const index = (i + b) % n;
+            if (!f[index]) {
+                f[index] = true;
+                count++;
+                const rad = Math.PI * 2 * index / n;
+                const x = Math.cos(rad) * r + cx, y = Math.sin(rad) * r + cy;
+                const point = `${x},${y} `;
+                points = points + point;
+            }
+        }
+        const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        poly.setAttribute("points", points);
+        // poly.setAttribute("fill", `rgb(${rr},${gg},${bb})`);
+        poly.setAttribute("stroke", "black");
+        poly.setAttribute("stroke-width", "0.5");
+        poly.setAttribute("marker-start", "url(#dot)");
+        poly.setAttribute("marker-mid", "url(#dot)");
+        return poly;
+    }
+
+    async function main() {
+        for (let n = 3; n < 1001; n++) {
+            const caption = document.getElementById("caption");
+            caption.innerHTML = `${n}`;
+            caption.setAttribute("x", cx);
+            caption.setAttribute("y", cy);
+            console.log(n);
+            const polys = document.getElementById("polys");
+            const svg = document;
+            rr = 128 + Math.random() * 128;
+            gg = 128 + Math.random() * 128;
+            bb = 128 + Math.random() * 128;
+            for (let j = 1; j < n / 2; j++) {
+                f = Array(n).fill(false);
+                count = 0;
+                let k = 0;
+                polys.replaceChildren([]);
+                while (count < n) {
+                    const poly = await sub(n, j, k);
+                    polys.appendChild(poly);
+                    k++;
+                }
+                await new Promise(r => setTimeout(r, 100));
+            }
+            await new Promise(r => setTimeout(r, 300));
+        }
+    }
+    main();
+</script>
